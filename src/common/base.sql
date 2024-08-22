@@ -1,72 +1,78 @@
--- Sentencia de SQL que crea nuestra base de datos
+-- 1. Crear la base de datos
 
-CREATE DATABASE plataforma_academica
-    WITH
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LOCALE_PROVIDER = 'libc'
-    CONNECTION LIMIT = -1
-    IS_TEMPLATE = False;
+CREATE DATABASE bootcamp_db;
 
--- Tablas iniciales que creamos
+-- 2. Crear la tabla students
 
-CREATE TABLE estudiantes (
-	id SERIAL PRIMARY KEY,
-	nombre VARCHAR(100) NOT NULL,
-	edad INT,
-	direccion TEXT
-);
-
-CREATE TABLE students (
-	id SERIAL PRIMARY KEY,
-	name VARCHAR(100) NOT NULL,
-	age INT,
-	address TEXT
-);
-
-CREATE TABLE profesores (
-	id SERIAL PRIMARY KEY,
-	nombre VARCHAR(100),
-	apellido VARCHAR(100),
-	profesion VARCHAR(100),
-	age INT,
-	academia VARCHAR(100)
-);
-
-CREATE TABLE estudiantes (
+CREATE TABLE "students" (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    edad INT,
-    correo VARCHAR(100) UNIQUE NOT NULL
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE cursos (
-	id SERIAL PRIMARY KEY,
-	nombre VARCHAR(100) NOT NULL,
-	descripcion TEXT,
-	activo BOOLEAN DEFAULT TRUE
+-- 3. Crear la Tabla courses
+
+CREATE TABLE "courses" (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE inscripciones (
-	id SERIAL PRIMARY KEY,
-	estudiante_id INT REFERENCES estudiantes(id),
-	curso_id INT REFERENCES cursos(id),
-	fecha_inscripcion DATE DEFAULT CURRENT_DATE
+-- 4. Crear la Tabla enrollments
+
+CREATE TABLE "enrollments" (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES "students"(id) ON DELETE CASCADE,
+    course_id INT REFERENCES "courses"(id) ON DELETE CASCADE,
+    grade VARCHAR(5),
+    "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO estudiantes (nombre, edad, correo)
-VALUES ('Juan Pérez', 21, 'juan.perez@example.com'),
-('María Lopez', 25, 'maria.lopez@example.com'),
-('Carlos Garcia', 30, 'carlos.garcia@example.com');
+-- 5. Relaciones entre las Tablas
 
-INSERT INTO cursos (nombre, descripcion, activo)
-VALUES ('Introducción a Node.js', 'Curso básico de Node.js', TRUE),
-('Desarrollo con Express', 'Curso avanzado de Express', TRUE),
-('Bases de Datos con PostgreSQL', 'Curso sobre PostgreSQL', FALSE);
+-- - **Relación uno a muchos**: `students` y `enrollments`
+--     - Un estudiante puede estar inscrito en varios cursos.
+--     - Un curso puede tener varios estudiantes inscritos.
+-- - **Relación muchos a muchos**: `students` y `courses` a través de la tabla `enrollments`
+--     - Esto se logra con las llaves foráneas `student_id` y `course_id` en la tabla `enrollments`.
 
-UPDATE estudiantes
-SET edad = 17
-WHERE id = 1;
+-- 6. Verificar la Estructura
 
-DELETE FROM estudiantes
-WHERE id = 1;
+SELECT * FROM students;
+SELECT * FROM courses;
+SELECT * FROM enrollments;
+
+-- 7. Inserciones de data base
+-- 7.1. Inserciones de tabla estudiantes
+INSERT INTO "students" (first_name, last_name, email, "createdAt", "updatedAt") VALUES
+('John', 'Doe', 'johndoe@example.com', NOW(), NOW()),
+('Jane', 'Smith', 'janesmith@example.com', NOW(), NOW()),
+('Michael', 'Johnson', 'michaelj@example.com', NOW(), NOW()),
+('Emily', 'Davis', 'emilydavis@example.com', NOW(), NOW()),
+('Chris', 'Brown', 'chrisbrown@example.com', NOW(), NOW());
+
+-- 7.2. Inserciones de tabla cursos
+INSERT INTO "courses" (title, description, "createdAt", "updatedAt") VALUES
+('Introduction to Programming', 'Learn the basics of programming using Python.', NOW(), NOW()),
+('Web Development', 'Build and design websites using HTML, CSS, and JavaScript.', NOW(), NOW()),
+('Database Design', 'Understand database concepts and learn SQL.', NOW(), NOW()),
+('Data Structures and Algorithms', 'Explore common data structures and algorithms.', NOW(), NOW()),
+('Machine Learning', 'Introduction to machine learning concepts and tools.', NOW(), NOW());
+
+-- 7.3. Inserciones de tabla inscripciones
+INSERT INTO "enrollments" (student_id, course_id, grade, "createdAt", "updatedAt") VALUES
+(1, 1, 'A', NOW(), NOW()),
+(1, 3, 'B', NOW(), NOW()),
+(2, 2, 'A', NOW(), NOW()),
+(2, 4, 'A', NOW(), NOW()),
+(3, 1, 'B', NOW(), NOW()),
+(3, 2, 'C', NOW(), NOW()),
+(4, 5, 'A', NOW(), NOW()),
+(5, 3, 'B', NOW(), NOW()),
+(5, 4, 'A', NOW(), NOW());
